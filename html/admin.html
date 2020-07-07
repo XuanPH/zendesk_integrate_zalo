@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet" />
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui" />
+    <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.15/lodash.min.js"></script>
+</head>
+<!-- phieu lien quan, thong tin them, OMS -->
+<style>
+    .subtitle {
+        color: #0D47A1 !important;
+        font-size: 10px !important;
+        cursor: pointer !important;
+    }
+    .v-text-field__details {
+        display: none;
+    }
+</style>
+
+<body>
+    <v-app id="app" class="app">
+        <v-row>
+            <v-col cols="12">
+                <v-form method="post" action="./admin_ui_2" name="form">
+                    <template>
+                        <v-card class="mx-auto" outlined style="width: 100%;">
+                            <v-list-item v-if="!_.isEmpty(authProfile)">
+                                <v-list-item-avatar color="grey">
+                                    <v-img class="elevation-6" :src="authProfile.avatar">
+                                    </v-img>
+                                </v-list-item-avatar>
+                                <v-list-item-content>
+                                    <v-list-item-title class="headline">{{authProfile.name}}</v-list-item-title>
+                                    <v-list-item-subtitle @click="redirect()" class="subtitle">
+                                        @{{authProfile.oa_id.toString()}}</v-list-item-subtitle>
+                                </v-list-item-content>
+                            </v-list-item>
+                            <v-divider class="mx-4"></v-divider>
+                            <div v-show="_.isEmpty(authProfile)">
+                                <v-card-title>Zalo Channel Configuration</v-card-title>
+                                <v-card-text>
+                                    <v-row>
+                                        <v-col cols="12" md="12">
+                                            <v-text-field label="Name" v-model="name" id="name" name="name" outlined
+                                                dense>
+                                            </v-text-field>
+                                        </v-col>
+                                        <v-col cols="12" md="12">
+                                            <v-text-field label="Zalo token" v-model="token" id="token" name="token"
+                                                outlined dense>
+                                            </v-text-field>
+                                            <a target="_blank" href="https://oauth.zaloapp.com/v3/oa/permission?app_id=2922004019320988365&redirect_uri=#redirect_zalo_url#">Get token here</a>
+                                        </v-col>
+                                    </v-row>
+                                </v-card-text>
+                                <v-divider class="mx-4"></v-divider>
+                            </div>
+                            <v-card-title>Optinonal Settings</v-card-title>
+                            <v-card-text>
+                                <v-row>
+                                    <v-text-field v-show="false" label="Zalo token" v-model="returnUrl" id="returnUrl"
+                                        name="returnUrl" outlined dense>
+                                    </v-text-field>
+                                    <v-text-field v-show="false"  v-model="zendeskParams.locale" id="locale"
+                                        name="locale" outlined dense>
+                                    </v-text-field>
+                                    <v-text-field v-show="false" v-model="zendeskParams.subdomain" id="subdomain"
+                                        name="subdomain" outlined dense>
+                                    </v-text-field>
+                                    <v-text-field v-show="false" v-model="zendeskParams.instancePushId" id="instance_push_id"
+                                        name="instance_push_id" outlined dense>
+                                    </v-text-field>
+                                    <v-text-field v-show="false" v-model="zendeskParams.zendeskAccessToken" id="zendesk_access_token"
+                                        name="zendesk_access_token" outlined dense>
+                                    </v-text-field>
+
+                                    <v-col cols="6">
+                                        <v-select :items="ticketsPriority" v-model="priority" item-value="id"
+                                            id="priority" name="priority" item-text="label" label="Priority" dense
+                                            outlined></v-select>
+                                    </v-col>
+                                    <v-col cols="6">
+                                        <v-select :items="ticketsType" item-value="id" v-model="type" item-text="label"
+                                            id="type" name="type" label="Type" dense outlined></v-select>
+                                    </v-col>
+                                    <v-col cols="12" md="12">
+                                        <v-combobox hide-selected label="Tags" v-model="tags" multiple persistent-hint
+                                            id="tags" name="tags" small-chips outlined dense>
+                                        </v-combobox>
+                                    </v-col>
+                                </v-row>
+                            </v-card-text>
+                            <v-card-actions>
+                                <v-btn
+                                class="ma-2"
+                                color="success"
+                                type="submit"
+                                min-width="200">
+                                Save</v-btn>
+                                <!-- <v-btn text color="primary" type="submit">
+                                    Lưu
+                                </v-btn> -->
+                            </v-card-actions>
+                        </v-card>
+                    </template>
+                </v-form>
+                <v-dialog style="display: none;" v-model="dialog" max-width="290">
+                    <v-card>
+                        <v-card-title class="headline">Thông báo</v-card-title>
+                        <v-card-text>{{dialogMessage}}
+                        </v-card-text>
+                        <v-card-actions>
+                            <v-spacer></v-spacer>
+                            <v-btn color="green darken-1" text @click="s_dialog = 'false'">
+                                Ok
+                            </v-btn>
+                        </v-card-actions>
+                    </v-card>
+                </v-dialog>
+            </v-col>
+        </v-row>
+
+    </v-app>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
+    <script>
+        var app = new Vue({
+            el: "#app",
+            vuetify: new Vuetify(),
+            data: () => ({
+                name: "#name#",
+                token: "#token#",
+                returnUrl: "#returnUrl#",
+                s_tags: "#tags#",
+                s_authProfile: "#authProfile#",
+                priority: "#priority#",
+                type: "#type#",
+                status: "#status#",
+                zendeskParams :{
+                    locale : "#z_locale#",
+                    subdomain: "#z_subdomain#",
+                    instancePushId: "#z_pushId#",
+                    zendeskAccessToken: "#z_accessToken#"
+
+                },
+                ticketsStatus: [{
+                    id: 'new',
+                    label: 'New'
+                }, {
+                    id: 'open',
+                    label: 'Open'
+                }, {
+                    id: 'pending',
+                    label: 'Pending'
+                }, {
+                    id: 'hold',
+                    label: 'Hold'
+                }, {
+                    id: 'solved',
+                    label: 'Solved'
+                }, {
+                    id: 'closed',
+                    label: 'Closed'
+                }],
+                ticketPrefixSubject: "#prefixSubject#",
+                ticketsPriority: [{
+                    id: "urgent",
+                    label: "Urgent"
+                }, {
+                    id: "high",
+                    label: "High"
+                }, {
+                    id: "normal",
+                    label: "Normal"
+                }, {
+                    id: "low",
+                    label: "Low"
+                }],
+                ticketsType: [{
+                    id: "question",
+                    label: "Question"
+                }, {
+                    id: "problem",
+                    label: "Problem"
+                }, {
+                    id: "incident",
+                    label: "Incident"
+                }, {
+                    id: "task",
+                    label: "Task"
+                }],
+                metadata: {},
+                s_dialog: "#isWarning#",
+                dialogMessage: "#warningMessage#"
+            }),
+            methods: {
+                redirect() {
+                    window.open(`https://zalo.me/${this.authProfile.oa_id.toString()}`, "_blank")
+                }
+            },
+            computed: {
+                tags() {
+                    try {
+                        var newTags = this.s_tags.split(",")
+                        return newTags.length == 1 && _.isEmpty(newTags[0]) ? [] : newTags
+                    } catch {
+                        return []
+                    }
+                },
+                authProfile() {
+                    if (_.isObject(this.s_authProfile) && !_.isEmpty(this.s_authProfile) && this.s_authProfile.oa_id != 0)
+                        return this.s_authProfile
+                    return {};
+                },
+                dialog() {
+                    return this.s_dialog == "true" ? true : false
+                }
+            }
+        })
+    </script>
+</body>
+
+</html>

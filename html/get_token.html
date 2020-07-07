@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet" />
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui" />
+    <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.15/lodash.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/@mdi/font@4.x/css/materialdesignicons.min.css" rel="stylesheet">
+</head>
+<!-- phieu lien quan, thong tin them, OMS -->
+<style>
+    .subtitle {
+        color: #0D47A1 !important;
+        font-size: 10px !important;
+        cursor: pointer !important;
+    }
+
+    .v-text-field__details {
+        display: none;
+    }
+</style>
+
+<body>
+    <v-app id="app" class="app">
+
+        <v-row>
+            <v-col cols="12">
+                <v-card class="mx-auto" max-width="700">
+                    <v-card-text>
+                        <div>Zendesk Integration</div>
+                        <p class="display-1 text--primary">
+                            Zalo page OA Token
+                        </p>
+                        <v-text-field id="token" readonly name="input-10-2" label="Your token here" v-model="zaloToken">
+                            <template v-slot:append>
+                                <v-tooltip bottom>
+                                    <template v-slot:activator="{ on }">
+                                        <v-icon @click="copy" style="cursor: pointer;" v-on="on">
+                                            mdi-content-copy
+                                        </v-icon>
+                                    </template>
+                                    Copy
+                                </v-tooltip>
+                            </template>
+                        </v-text-field>
+                    </v-card-text>
+                </v-card>
+            </v-col>
+        </v-row>
+        <v-snackbar v-model="snackbar" :color="color" :timeout="3000" top>
+            Copied to clipboard
+            <v-btn dark text @click="snackbar = false">
+                Close
+            </v-btn>
+        </v-snackbar>
+    </v-app>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
+    <script>
+        var app = new Vue({
+            el: "#app",
+            vuetify: new Vuetify(),
+            data: () => ({
+                zaloToken: "#token#",
+                zaloOaID: "#oaid#",
+                snackbar: false,
+                color: "info",
+                text: "Copied to clipboard"
+            }),
+            methods: {
+                copy() {
+                    let testingCodeToCopy = document.querySelector('#token')
+                    testingCodeToCopy.setAttribute('type', 'text') // 不是 hidden 才能複製
+                    testingCodeToCopy.select()
+                    try {
+                        var successful = document.execCommand('copy');
+                        this.color = successful ? 'info' : 'error';
+                        this.text = successful ? 'Copied to clipboard' : `Can't Copy to clipboard`
+                        this.snackbar = true;
+                    } catch (err) {
+                        this.color = "error"
+                        this.text = `Oops, unable to copy`
+                        this.snackbar = true
+                    }
+
+                    /* unselect the range */
+                    //testingCodeToCopy.setAttribute('type', 'hidden')
+                    window.getSelection().removeAllRanges()
+                }
+            },
+        })
+    </script>
+</body>
+
+</html>

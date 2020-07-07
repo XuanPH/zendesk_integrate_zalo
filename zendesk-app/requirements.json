@@ -1,0 +1,9 @@
+{
+    "channel_integrations": {
+      "zalo": {
+        "manifest_url":
+          "https://api.quesera.sg/manifest"
+      }
+    }
+  }
+  

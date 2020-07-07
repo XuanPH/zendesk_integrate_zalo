@@ -1,0 +1,12 @@
+{
+  "name": "Zalo",
+  "author": {
+    "name": "Xuan Pham",
+    "email": "xuan.pham@quesera.sg",
+    "url": "https://quesera.sg"
+  },
+  "defaultLocale": "en",
+  "private": true,
+  "version": "1.0",
+  "requirementsOnly": true
+}

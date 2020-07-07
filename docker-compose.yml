@@ -1,0 +1,11 @@
+version: "2"
+
+services:
+  zendesk-integration:
+    container_name: zendesk-integration
+    build: .
+    image: zendesk-integration:lastest
+    ports:
+      - "3000:3000"
+    environment:
+      - APP_NAME=zendesk_integration
